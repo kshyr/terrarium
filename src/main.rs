@@ -1,22 +1,27 @@
-use std::process::exit;
-
 use bevy::{
-    core_pipeline::clear_color::ClearColorConfig, prelude::*, sprite::MaterialMesh2dBundle,
+    core_pipeline::clear_color::ClearColorConfig,
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    prelude::*,
+    sprite::MaterialMesh2dBundle,
     window::PrimaryWindow,
 };
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
-const NUM_ANTS: u32 = 10;
+const NUM_ANTS: u32 = 20;
 const ANT_SPEED: f32 = 100.0;
 const ANT_SIZE: f32 = 4.0;
 const SEARCH_FACTOR: f32 = 0.2;
-const TRAIL_INTERVAL: f32 = 0.01;
-const TRAIL_LIFESPAN: f32 = 10.0;
+const TRAIL_INTERVAL: f32 = 0.1;
+const TRAIL_LIFESPAN: f32 = 15.0;
 const FOOD_DISTANCE: f32 = 150.0;
 const HOME: Vec2 = Vec2::new(0.0, 0.0);
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_startup_system(spawn_camera)
         .add_startup_system(spawn_ants)
         .add_startup_system(spawn_food)
@@ -94,8 +99,8 @@ fn spawn_food(
                 mesh: meshes.add(shape::Circle::new(2.0).into()).into(),
                 material: materials.add(ColorMaterial::from(Color::OLIVE)),
                 transform: Transform::from_translation(Vec3::new(
-                    random_range(-100.0, -110.0),
-                    random_range(100.0, 110.0),
+                    random_range(-180.0, -190.0),
+                    random_range(210.0, 220.0),
                     0.,
                 )),
                 ..Default::default()
@@ -110,8 +115,8 @@ fn spawn_food(
                 mesh: meshes.add(shape::Circle::new(2.0).into()).into(),
                 material: materials.add(ColorMaterial::from(Color::OLIVE)),
                 transform: Transform::from_translation(Vec3::new(
-                    random_range(-200.0, -210.0),
-                    random_range(-200.0, -210.0),
+                    random_range(150.0, 160.0),
+                    random_range(180.0, 190.0),
                     0.,
                 )),
                 ..Default::default()
@@ -166,7 +171,7 @@ fn move_ants(
                     transform: Transform::from_translation(Vec3::new(
                         translation.x,
                         translation.y,
-                        1.0,
+                        if ant.found_food { 5.0 } else { 1.0 },
                     )),
                     ..Default::default()
                 },
